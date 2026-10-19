@@ -45,10 +45,11 @@ test("repository and team PR pages fetch only the viewer's undismissed decisive 
     assert.equal(variables.viewer, 'me');
     assert.equal(variables.viewerKnown, true);
     assert.match(query, /reviews\(author: \$viewer, states: \[APPROVED, CHANGES_REQUESTED\]\) @include\(if: \$viewerKnown\)/);
+    assert.match(query, /viewerApprovals: reviews\(author: \$viewer, states: \[APPROVED\]\) @include\(if: \$viewerKnown\)\s*\{\s*totalCount\s*\}/);
     // GitHub filters out dismissed, comment-only, pending and other users' reviews.
     const nodes = [0, 1].map(totalCount => ({ id: String(totalCount),
       __typename: 'PullRequest', isDraft: false, reviewDecision: 'CHANGES_REQUESTED',
-      mergeable: 'MERGEABLE', commits: { nodes: [] }, viewerActiveReviews: { totalCount } }));
+      mergeable: 'MERGEABLE', commits: { nodes: [] }, viewerActiveReviews: { totalCount }, viewerApprovals: { totalCount } }));
     const page = { nodes, issueCount: 2, totalCount: 2,
       pageInfo: { hasNextPage: false, endCursor: null } };
     return response({ data: query.includes('TeamPRPage') ? { search: page }
@@ -57,6 +58,7 @@ test("repository and team PR pages fetch only the viewer's undismissed decisive 
   try {
     for (const members of [undefined, ['author']]) {
       const page = await fetchPullRequestPage('o', 'r', null, members, 'captured', undefined, true, 'me');
+      assert.deepEqual(page.nodes.map(pr => pr.viewerApprovals?.totalCount), [0, 1]);
       const visible = page.nodes.filter(pr => matchesFilters(pr, { ...defaultFilters, failingOnly: true }, 'me'));
       assert.deepEqual(visible.map(pr => pr.id), ['0']);
     }

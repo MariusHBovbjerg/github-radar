@@ -48,6 +48,7 @@ export interface PullRequestNode {
   mergeable: MergeableState;
   reviewDecision: ReviewDecision;
   viewerActiveReviews?: { totalCount: number };
+  viewerApprovals?: { totalCount: number };
   additions: number;
   deletions: number;
   commits: {
@@ -98,6 +99,9 @@ const PR_FIELDS = `
           mergeable
           reviewDecision
           viewerActiveReviews: reviews(author: $viewer, states: [APPROVED, CHANGES_REQUESTED]) @include(if: $viewerKnown) {
+            totalCount
+          }
+          viewerApprovals: reviews(author: $viewer, states: [APPROVED]) @include(if: $viewerKnown) {
             totalCount
           }
           additions
