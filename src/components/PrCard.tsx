@@ -59,7 +59,7 @@ export function PrCard({ pr, owner, name }: PrCardProps) {
                 Approved by you
               </span>
             )}
-            {status.approved && (
+            {status.approved && (!status.approvedByViewer || status.readyToMerge) && (
               <span className="pill bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
                 title={status.readyToMerge ? "Approved, checks passing and mergeable; GitHub verifies final merge requirements" : "Review approved; check CI and merge status before merging"}>
                 {status.readyToMerge ? <GitMerge className="h-3 w-3" /> : <CheckCircle2 className="h-3 w-3" />}
